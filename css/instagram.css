@@ -57,17 +57,19 @@
 .ig-media-container {
   position: relative;
   width: 100%;
-  aspect-ratio: 4 / 5; /* Default IG portrait */
+  aspect-ratio: 4 / 5;
   background: #111;
   overflow: hidden;
   display: flex;
+  touch-action: pan-y pinch-zoom;
 }
 
 .ig-media-track {
   display: flex;
   width: 100%;
   height: 100%;
-  transition: transform 0.3s ease-in-out;
+  transition: transform 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  will-change: transform;
 }
 
 .ig-media-item {
@@ -78,25 +80,71 @@
   transition: transform 0.3s ease;
 }
 
+.ig-media-item:hover {
+  transform: scale(1.02);
+}
+
+/* Touch swipe hint */
+.ig-media-container::after {
+  content: '← deslize →';
+  position: absolute;
+  bottom: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 10px;
+  color: rgba(255,255,255,0.4);
+  opacity: 0;
+  transition: opacity 0.3s;
+  pointer-events: none;
+}
+
+.ig-media-container:hover::after {
+  opacity: 1;
+}
+
 /* Carousel Controls */
 .ig-carousel-btn {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  width: 30px;
-  height: 30px;
+  width: 32px;
+  height: 32px;
   border-radius: 50%;
-  background: rgba(0,0,0,0.5);
+  background: rgba(0,0,0,0.6);
   color: #fff;
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
   z-index: 10;
-  font-size: 12px;
+  font-size: 14px;
+  border: none;
+  transition: all 0.2s;
+  backdrop-filter: blur(4px);
 }
+
+.ig-carousel-btn:hover {
+  background: rgba(0,0,0,0.8);
+  transform: translateY(-50%) scale(1.1);
+}
+
+.ig-carousel-btn:active {
+  transform: translateY(-50%) scale(0.95);
+}
+
+.ig-carousel-btn:focus-visible {
+  outline: 2px solid var(--color-ig-blue);
+  outline-offset: 2px;
+}
+
 .ig-carousel-prev { left: 10px; }
 .ig-carousel-next { right: 10px; }
+
+/* Hide arrows at edges */
+.ig-carousel-btn[style*="display: none"] {
+  opacity: 0;
+  pointer-events: none;
+}
 
 .ig-carousel-indicators {
   position: absolute;
@@ -115,9 +163,76 @@
   height: 6px;
   border-radius: 50%;
   background: rgba(255,255,255,0.4);
+  transition: all 0.3s;
 }
 .ig-indicator.active {
   background: rgba(255,255,255,1);
+  transform: scale(1.3);
+}
+
+/* Video/Reels Support */
+.ig-video-wrapper {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  background: #000;
+}
+
+.ig-video-wrapper video {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.ig-video-controls {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px;
+  background: linear-gradient(transparent, rgba(0,0,0,0.7));
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.ig-video-wrapper:hover .ig-video-controls {
+  opacity: 1;
+}
+
+.ig-play-btn {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  background: rgba(255,255,255,0.9);
+  color: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  border: none;
+  font-size: 18px;
+  transition: transform 0.2s;
+}
+
+.ig-play-btn:hover {
+  transform: scale(1.1);
+}
+
+.ig-reels-badge {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  background: rgba(0,0,0,0.6);
+  padding: 4px 8px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
 
 /* Tag CTA (Product Tag or link) */
@@ -193,4 +308,15 @@
   font-size: 12px;
   color: var(--color-ig-text-muted);
   text-transform: uppercase;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+  .ig-media-track,
+  .ig-media-item,
+  .ig-carousel-btn,
+  .ig-indicator {
+    transition: none !important;
+    animation: none !important;
+  }
 }

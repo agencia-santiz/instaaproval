@@ -177,6 +177,34 @@ function renderFeed() {
     const container = document.getElementById('main-content-area');
     container.innerHTML = '';
     
+    // Calculate metrics
+    const clientPosts = state.data.posts.filter(p => p.clientId === state.currentClient);
+    const total = clientPosts.length;
+    const pending = clientPosts.filter(p => p.status === 'pending').length;
+    const approved = clientPosts.filter(p => p.status === 'approved').length;
+    const rejected = clientPosts.filter(p => p.status === 'rejected').length;
+    
+    const metricsHTML = `
+        <div class="metrics-bar" role="region" aria-label="Métricas do cliente" style="display:grid; grid-template-columns:repeat(4, 1fr); gap:16px; margin-bottom:24px;">
+            <div class="metric-card" style="background:rgba(39,39,42,0.6); backdrop-filter:blur(20px); border-radius:12px; padding:16px; text-align:center;">
+                <div style="font-size:24px; font-weight:700;">${total}</div>
+                <div style="font-size:12px; color:var(--color-text-secondary);">Total</div>
+            </div>
+            <div class="metric-card" style="background:rgba(245,158,11,0.15); border:1px solid rgba(245,158,11,0.3); border-radius:12px; padding:16px; text-align:center;">
+                <div style="font-size:24px; font-weight:700; color:var(--color-warning);">${pending}</div>
+                <div style="font-size:12px; color:var(--color-text-secondary);">Pendentes</div>
+            </div>
+            <div class="metric-card" style="background:rgba(16,185,129,0.15); border:1px solid rgba(16,185,129,0.3); border-radius:12px; padding:16px; text-align:center;">
+                <div style="font-size:24px; font-weight:700; color:var(--color-success);">${approved}</div>
+                <div style="font-size:12px; color:var(--color-text-secondary);">Aprovados</div>
+            </div>
+            <div class="metric-card" style="background:rgba(239,68,68,0.15); border:1px solid rgba(239,68,68,0.3); border-radius:12px; padding:16px; text-align:center;">
+                <div style="font-size:24px; font-weight:700; color:var(--color-danger);">${rejected}</div>
+                <div style="font-size:12px; color:var(--color-text-secondary);">Rejeitados</div>
+            </div>
+        </div>
+    `;
+    
     const filterHTML = `
         <div class="filter-bar" role="group" aria-label="Filtrar por status">
             <button class="filter-btn ${state.statusFilter === 'all' ? 'active' : ''}" onclick="setStatusFilter('all')" aria-pressed="${state.statusFilter === 'all'}">Todos</button>
@@ -197,7 +225,7 @@ function renderFeed() {
         return;
     }
     
-    container.innerHTML = filterHTML;
+    container.innerHTML = metricsHTML + filterHTML;
     
     posts.forEach(post => {
         container.appendChild(createPostInterface(post));
@@ -210,6 +238,22 @@ window.setStatusFilter = (filter) => {
     state.statusFilter = filter;
     renderFeed();
 };
+
+function getTimeAgo(dateStr) {
+    if (!dateStr) return '';
+    const now = new Date();
+    const date = new Date(dateStr);
+    const diffMs = now - date;
+    const diffMins = Math.floor(diffMs / 60000);
+    const diffHours = Math.floor(diffMs / 3600000);
+    const diffDays = Math.floor(diffMs / 86400000);
+    
+    if (diffMins < 1) return 'agora';
+    if (diffMins < 60) return `${diffMins}min atrás`;
+    if (diffHours < 24) return `${diffHours}h atrás`;
+    if (diffDays < 7) return `${diffDays}d atrás`;
+    return dateStr;
+}
 
 // -----------------------------------------
 // COMPONENT: Post Approval Interface
@@ -228,15 +272,18 @@ function createPostInterface(post) {
     const s = statusMap[post.status];
 
     const igMarkup = buildInstagramCard(post);
-    const commentsMarkup = post.comments.map(c => `
-        <div class="comment-box">
+    const commentsMarkup = post.comments.map(c => {
+        const timeAgo = getTimeAgo(c.date);
+        return `
+        <div class="comment-box" role="article" aria-label="Comentário de ${c.author}">
             <div style="display:flex; justify-content:space-between; margin-bottom:4px">
                 <b>${c.author}</b>
-                <span class="text-secondary" style="font-size:11px">${c.date}</span>
+                <span class="text-secondary" style="font-size:11px" title="${c.date}">${timeAgo}</span>
             </div>
             ${c.text}
         </div>
-    `).join('');
+    `;
+    }).join('');
 
     el.innerHTML = `
         <div class="preview-col">
@@ -279,22 +326,44 @@ function createPostInterface(post) {
 // -----------------------------------------
 function buildInstagramCard(post) {
     
-    state.carousels[post.id] = 0; // initialize carousel state
-    const isCarousel = post.media.length > 1;
+    state.carousels[post.id] = 0;
+    const isCarousel = post.type === 'carousel' && post.media && post.media.length > 1;
+    const isReels = post.type === 'reels';
     
-    // Images setup
     let mediaHTML = '';
     let indicatorsHTML = '';
     
-    if (isCarousel) {
-        mediaHTML = post.media.map(src => `<img class="ig-media-item" src="${src}">`).join('');
+    // Check if has video
+    const hasVideo = isReels && post.media && post.media.length > 0 && (post.media[0].endsWith('.mp4') || post.media[0].includes('video'));
+    
+    if (isReels) {
+        // Reels/Video format
+        mediaHTML = `
+            <div class="ig-video-wrapper">
+                <video id="video-${post.id}" poster="${post.media[0]}">
+                    <source src="${post.media[0]}" type="video/mp4">
+                </video>
+                <div class="ig-reels-badge">
+                    <i data-lucide="play" style="width:12px;height:12px;"></i> REELS
+                </div>
+                <div class="ig-video-controls">
+                    <button class="ig-play-btn" onclick="toggleVideo('${post.id}')" aria-label="Reproduzir vídeo">
+                        <i data-lucide="play"></i>
+                    </button>
+                </div>
+            </div>
+        `;
+    } else if (isCarousel) {
+        // Carousel with images
+        mediaHTML = post.media.map(src => `<img class="ig-media-item" src="${src}" alt="Slide" loading="lazy">`).join('');
         indicatorsHTML = `
-            <div class="ig-carousel-indicators" id="ind-${post.id}">
-                ${post.media.map((_, i) => `<div class="ig-indicator ${i===0?'active':''}"></div>`).join('')}
+            <div class="ig-carousel-indicators" id="ind-${post.id}" role="group" aria-label="Navegar carousel">
+                ${post.media.map((_, i) => `<div class="ig-indicator ${i===0?'active':''}" role="button" tabindex="0"></div>`).join('')}
             </div>
         `;
     } else {
-        mediaHTML = `<img class="ig-media-item" src="${post.media[0]}">`;
+        // Single image
+        mediaHTML = `<img class="ig-media-item" src="${post.media[0]}" alt="Post" loading="lazy">`;
     }
     
     // Format caption rendering (hashtags in blue)
@@ -377,6 +446,17 @@ window.moveCarousel = (postId, dir) => {
         Array.from(indContainer.children).forEach((dot, i) => {
             dot.className = `ig-indicator ${i === idx ? 'active' : ''}`;
         });
+    }
+};
+
+window.toggleVideo = (postId) => {
+    const video = document.getElementById(`video-${postId}`);
+    if (!video) return;
+    
+    if (video.paused) {
+        video.play();
+    } else {
+        video.pause();
     }
 };
 
