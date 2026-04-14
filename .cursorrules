@@ -1,0 +1,23 @@
+# REGRAS DO PROJETO - WEB APP CONTEMPORÂNEO (CLAUDE SKILLS)
+
+Este projeto deve seguir rigorosamente as diretrizes e habilidades estabelecidas na pasta `docs/skills/`.
+
+## Instruções Principais:
+
+1. **Acessar as Skills**: Ao desenvolver novas páginas, componentes ou funcionalidades para este aplicativo web, VOCÊ DEVE SEMPRE consultar os arquivos contidos em `docs/skills/`:
+   - `01-design-philosophy.md`: Tendências de UI contemporâneas, cores avançadas, tipografias ricas e design premium.
+   - `02-advanced-css-animations.md`: Técnicas de animação CSS puras (Scroll-Driven, View Transitions), micro-interações, magnetic buttons e preloader.
+   - `03-implementation-workflow.md`: Estrutura de pastas correta (Vanilla JS/HTML/CSS), organização do projeto e boas práticas arquiteturais.
+   - `04-performance-seo.md`: Critical render path, webp image optimization, lazy loading, PWA concepts (se aplicável), e SEO markup (Schema.org, Open Graph).
+
+2. **Diretrizes Arquiteturais (Web App)**:
+   - Se for usar **HTML/CSS/JS Vanilla**, utilize a separação definida em `03-implementation-workflow.md` e não dependa de bibliotecas de terceiros quando recursos nativos do CSS e JS dão conta do recado.
+   - Se o App for muito complexo a ponto de exigir renderização dinâmica com bibliotecas, utilize as diretrizes do arquivo sobre SPA/PWA se especificado pelo usuário (Vite, Next.js), mantendo sempre o foco nos princípios de estética e animações previstos nos arquivos markdown.
+   - NUNCA use Bootstrap ou o Tailwind (exceto se instruído explicitamente), e priorize o CSS Vanilla em arquivos separados como descrito no Workflow.
+
+3. **Mindset do Desenvolvedor**:
+   - Este não é apenas mais um site; o foco absoluto é entregar **Excelência e Qualidade Premium "Cinematográfica"** e uma Experiência Centrada no Usuário com estética e fluidez excepcionais.
+   - Nunca use cores flat simples, sempre explore HSL.
+   - Crie animações suaves em `transform` e `opacity`.
+
+Seja sempre proativo em implementar os detalhes como `View Transitions`, `Magnetic cursors`, e otimizações de performance sem que o usuário precise pedir!
