@@ -4,7 +4,9 @@ let state = {
     currentClient: 'c1',
     activeView: 'feed',
     carousels: {},
-    statusFilter: 'all'
+    statusFilter: 'all',
+    loading: false,
+    data: { clients: [], posts: [] }
 };
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -12,11 +14,67 @@ document.addEventListener('DOMContentLoaded', () => {
     initApp();
 });
 
-function initApp() {
+async function initApp() {
+    showLoading();
+    await loadData();
     renderClientList();
     renderFeed();
     setupEventListeners();
     addGrainOverlay();
+}
+
+async function loadData() {
+    try {
+        const supabaseUrl = 'https://dbrbieetsihnlzfjjrbw.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBiYW5lIiwicmVmIjoiZGJyYmllZXRzaWhubHpmanJidyIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzc2MTI0MzE1LCJleHAiOjIwOTE3MDAzMTV9.v99ZcA8NIRD2-w6YpSb_ffMnvk3-eyPAMRT_4hAdGsU';
+        
+        const headers = {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`
+        };
+        
+        // Fetch clients
+        const clientsRes = await fetch(`${supabaseUrl}/rest/v1/clients?select=*`, { headers });
+        const clients = await clientsRes.json();
+        
+        if (clients && clients.length > 0) {
+            state.data.clients = clients.map(c => ({
+                id: c.id,
+                name: c.name,
+                avatar: c.avatar_url,
+                color: c.color || '#BA0C2F'
+            }));
+            
+            // Fetch posts for first client
+            if (state.data.clients.length > 0) {
+                state.currentClient = state.data.clients[0].id;
+                const postsRes = await fetch(`${supabaseUrl}/rest/v1/posts?client_id=eq.${state.currentClient}&select=*`, { headers });
+                const posts = await postsRes.json();
+                state.data.posts = posts.map(p => ({
+                    id: p.id,
+                    clientId: p.client_id,
+                    type: p.type,
+                    status: p.status,
+                    date: p.date,
+                    username: p.username,
+                    userAvatar: p.user_avatar,
+                    media: p.media || [],
+                    likes: p.likes,
+                    caption: p.caption,
+                    ctaText: p.cta_text,
+                    comments: []
+                }));
+            }
+            
+            if (state.data.clients.length > 0) {
+                document.getElementById('current-view-title').textContent = `Cliente: ${state.data.clients[0].name}`;
+            }
+        }
+    } catch (e) {
+        console.warn('Supabase unavailable, using mock data:', e);
+        state.data.clients = MOCK_DATA.clients;
+        state.data.posts = MOCK_DATA.posts;
+    }
 }
 
 function addGrainOverlay() {
@@ -27,25 +85,86 @@ function addGrainOverlay() {
     }
 }
 
+function showLoading() {
+    const container = document.getElementById('main-content-area');
+    container.innerHTML = `
+        <div style="text-align:center; padding: 60px;">
+            <div class="loading-skeleton" style="width:48px; height:48px; border-radius:50%; margin:0 auto 16px;"></div>
+            <p class="text-secondary loading-dots">Carregando</p>
+        </div>
+    `;
+}
+
 function renderClientList() {
     const listEl = document.getElementById('client-list');
     listEl.innerHTML = '';
     
-    MOCK_DATA.clients.forEach(client => {
+    const clients = state.data.clients;
+    if (!clients || clients.length === 0) {
+        listEl.innerHTML = '<div class="text-secondary" style="padding: 16px; font-size: 14px;">Nenhum cliente encontrado.</div>';
+        return;
+    }
+    
+    clients.forEach((client, idx) => {
         const link = document.createElement('a');
         link.className = `nav-link ${state.currentClient === client.id ? 'active' : ''}`;
+        link.setAttribute('role', 'button');
+        link.setAttribute('tabindex', '0');
+        link.setAttribute('aria-pressed', state.currentClient === client.id);
+        const color = client.color || getColorForClient(client.id);
         link.innerHTML = `
-            <div class="client-dot" style="background: ${getColorForClient(client.id)}"></div>
+            <div class="client-dot" style="background: ${color}"></div>
             ${client.name}
         `;
-        link.onclick = () => {
-            state.currentClient = client.id;
-            renderClientList(); // update active state
-            renderFeed();
-            document.getElementById('current-view-title').textContent = `Cliente: ${client.name}`;
-        };
+        link.onclick = () => selectClient(client.id, client.name);
+        link.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                selectClient(client.id, client.name);
+            }
+        });
+        link.style.animationDelay = `${idx * 50}ms`;
         listEl.appendChild(link);
     });
+}
+
+function selectClient(clientId, clientName) {
+    state.currentClient = clientId;
+    renderClientList();
+    renderFeed();
+    document.getElementById('current-view-title').textContent = `Cliente: ${clientName}`;
+    loadClientPosts(clientId);
+}
+
+async function loadClientPosts(clientId) {
+    showLoading();
+    try {
+        const supabaseUrl = 'https://dbrbieetsihnlzfjjrbw.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBiYW5lIiwicmVmIjoiZGJyYmllZXRzaWhubHpmanJidyIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzc2MTI0MzE1LCJleHAiOjIwOTE3MDAzMTV9.v99ZcA8NIRD2-w6YpSb_ffMnvk3-eyPAMRT_4hAdGsU';
+        const headers = {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`
+        };
+        const res = await fetch(`${supabaseUrl}/rest/v1/posts?client_id=eq.${clientId}&select=*`, { headers });
+        const posts = await res.json();
+        state.data.posts = posts.map(p => ({
+            id: p.id,
+            clientId: p.client_id,
+            type: p.type,
+            status: p.status,
+            date: p.date,
+            username: p.username,
+            userAvatar: p.user_avatar,
+            media: p.media || [],
+            likes: p.likes,
+            caption: p.caption,
+            ctaText: p.cta_text,
+            comments: []
+        }));
+    } catch (e) {
+        state.data.posts = MOCK_DATA.posts.filter(p => p.clientId === clientId);
+    }
+    renderFeed();
 }
 
 function getColorForClient(id) {
@@ -59,22 +178,22 @@ function renderFeed() {
     container.innerHTML = '';
     
     const filterHTML = `
-        <div class="filter-bar">
-            <button class="filter-btn ${state.statusFilter === 'all' ? 'active' : ''}" onclick="setStatusFilter('all')">Todos</button>
-            <button class="filter-btn ${state.statusFilter === 'pending' ? 'active' : ''}" onclick="setStatusFilter('pending')">Pendentes</button>
-            <button class="filter-btn ${state.statusFilter === 'approved' ? 'active' : ''}" onclick="setStatusFilter('approved')">Aprovados</button>
-            <button class="filter-btn ${state.statusFilter === 'rejected' ? 'active' : ''}" onclick="setStatusFilter('rejected')">Rejeitados</button>
+        <div class="filter-bar" role="group" aria-label="Filtrar por status">
+            <button class="filter-btn ${state.statusFilter === 'all' ? 'active' : ''}" onclick="setStatusFilter('all')" aria-pressed="${state.statusFilter === 'all'}">Todos</button>
+            <button class="filter-btn ${state.statusFilter === 'pending' ? 'active' : ''}" onclick="setStatusFilter('pending')" aria-pressed="${state.statusFilter === 'pending'}">Pendentes</button>
+            <button class="filter-btn ${state.statusFilter === 'approved' ? 'active' : ''}" onclick="setStatusFilter('approved')" aria-pressed="${state.statusFilter === 'approved'}">Aprovados</button>
+            <button class="filter-btn ${state.statusFilter === 'rejected' ? 'active' : ''}" onclick="setStatusFilter('rejected')" aria-pressed="${state.statusFilter === 'rejected'}">Rejeitados</button>
         </div>
     `;
     
-    let posts = MOCK_DATA.posts.filter(p => p.clientId === state.currentClient);
+    let posts = state.data.posts.filter(p => p.clientId === state.currentClient);
     
     if (state.statusFilter !== 'all') {
         posts = posts.filter(p => p.status === state.statusFilter);
     }
     
     if(posts.length === 0) {
-        container.innerHTML = filterHTML + `<div class="text-secondary" style="text-align:center; padding: 40px;">Nenhum post encontrado.</div>`;
+        container.innerHTML = filterHTML + `<div class="text-secondary" style="text-align:center; padding: 40px;" role="status" aria-live="polite">Nenhum post encontrado.</div>`;
         return;
     }
     
@@ -128,11 +247,11 @@ function createPostInterface(post) {
             <div style="display:flex; justify-content:space-between; align-items:center; border-bottom:1px solid rgba(255,255,255,0.05); padding-bottom:16px;">
                 <div>
                     <h3 style="margin-bottom:8px;">Planejamento: ${post.date}</h3>
-                    <span class="status-badge ${s.class}">${s.text}</span>
+                    <span class="status-badge ${s.class}" role="status" aria-label="Status: ${s.text}">${s.text}</span>
                 </div>
                 <div style="display:flex; gap:8px;">
-                    <button class="btn btn-danger" onclick="updateStatus('${post.id}', 'rejected')"><i data-lucide="x"></i> Recusar</button>
-                    <button class="btn btn-success" onclick="updateStatus('${post.id}', 'approved')"><i data-lucide="check"></i> Aprovar</button>
+                    <button class="btn btn-danger" onclick="updateStatus('${post.id}', 'rejected')" aria-label="Requisar post"><i data-lucide="x"></i> Recusar</button>
+                    <button class="btn btn-success" onclick="updateStatus('${post.id}', 'approved')" aria-label="Aprovar post"><i data-lucide="check"></i> Aprovar</button>
                 </div>
             </div>
             
@@ -140,13 +259,14 @@ function createPostInterface(post) {
                 <h4>Trilha de Comentários</h4>
             </div>
             
-            <div class="feedback-list" id="comments-${post.id}">
+            <div class="feedback-list" id="comments-${post.id}" aria-live="polite">
                 ${commentsMarkup || '<div class="text-secondary">Nenhum comentário.</div>'}
             </div>
             
             <div class="comment-input-area">
-                <input type="text" class="comment-input" placeholder="Adicionar feedback..." id="input-${post.id}">
-                <button class="btn btn-primary" onclick="addComment('${post.id}')"><i data-lucide="send"></i></button>
+                <label for="input-${post.id}" class="sr-only">Adicionar comentário</label>
+                <input type="text" class="comment-input" id="input-${post.id}" placeholder="Adicionar feedback…" aria-label="Adicionar feedback">
+                <button class="btn btn-primary" onclick="addComment('${post.id}')" aria-label="Enviar comentário"><i data-lucide="send"></i></button>
             </div>
         </div>
     `;
@@ -233,9 +353,10 @@ function buildInstagramCard(post) {
 // -----------------------------------------
 
 window.moveCarousel = (postId, dir) => {
-    const post = MOCK_DATA.posts.find(p => p.id === postId);
+    const post = state.data.posts.find(p => p.id === postId);
+    if (!post || !post.media) return;
     const maxIdx = post.media.length - 1;
-    let idx = state.carousels[postId];
+    let idx = state.carousels[postId] || 0;
     
     idx += dir;
     if (idx < 0) idx = 0;
@@ -243,40 +364,79 @@ window.moveCarousel = (postId, dir) => {
     
     state.carousels[postId] = idx;
     
-    // Update Track
     const track = document.getElementById(`track-${postId}`);
-    track.style.transform = `translateX(-${idx * 100}%)`;
+    if (track) track.style.transform = `translateX(-${idx * 100}%)`;
     
-    // Update Buttons
     const prev = document.getElementById(`prev-${postId}`);
     const next = document.getElementById(`next-${postId}`);
-    prev.style.display = idx === 0 ? 'none' : 'flex';
-    next.style.display = idx === maxIdx ? 'none' : 'flex';
+    if (prev) prev.style.display = idx === 0 ? 'none' : 'flex';
+    if (next) next.style.display = idx === maxIdx ? 'none' : 'flex';
     
-    // Update Indicators
     const indContainer = document.getElementById(`ind-${postId}`);
-    Array.from(indContainer.children).forEach((dot, i) => {
-        dot.className = `ig-indicator ${i === idx ? 'active' : ''}`;
-    });
+    if (indContainer) {
+        Array.from(indContainer.children).forEach((dot, i) => {
+            dot.className = `ig-indicator ${i === idx ? 'active' : ''}`;
+        });
+    }
 };
 
-window.updateStatus = (postId, status) => {
-    const post = MOCK_DATA.posts.find(p => p.id === postId);
+window.updateStatus = async (postId, status) => {
+    const post = state.data.posts.find(p => p.id === postId);
+    if (!post) return;
     post.status = status;
+    
+    try {
+        const supabaseUrl = 'https://dbrbieetsihnlzfjjrbw.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBiYW5lIiwicmVmIjoiZGJyYmllZXRzaWhubHpmanJidyIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzc2MTI0MzE1LCJleHAiOjIwOTE3MDAzMTV9.v99ZcA8NIRD2-w6YpSb_ffMnvk3-eyPAMRT_4hAdGsU';
+        const headers = {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+        };
+        await fetch(`${supabaseUrl}/rest/v1/posts?id=eq.${postId}`, {
+            method: 'PATCH',
+            headers,
+            body: JSON.stringify({ status })
+        });
+    } catch (e) {
+        console.warn('Could not update in Supabase:', e);
+    }
     renderFeed();
 };
 
-window.addComment = (postId) => {
+window.addComment = async (postId) => {
     const input = document.getElementById(`input-${postId}`);
     if(!input.value.trim()) return;
     
-    const post = MOCK_DATA.posts.find(p => p.id === postId);
-    post.comments.push({
+    const post = state.data.posts.find(p => p.id === postId);
+    if (!post) return;
+    
+    const newComment = {
         author: 'Você (Admin)',
         text: input.value,
-        date: new Date().toLocaleDateString(),
+        date: new Date().toLocaleDateString('pt-BR'),
         type: 'internal'
-    });
+    };
+    post.comments.push(newComment);
+    
+    try {
+        const supabaseUrl = 'https://dbrbieetsihnlzfjjrbw.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBiYW5lIiwicmVmIjoiZGJyYmllZXRzaWhubHpmanJidyIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzc2MTI0MzE1LCJleHAiOjIwOTE3MDAzMTV9.v99ZcA8NIRD2-w6YpSb_ffMnvk3-eyPAMRT_4hAdGsU';
+        const headers = {
+            'apikey': supabaseKey,
+            'Authorization': `Bearer ${supabaseKey}`,
+            'Content-Type': 'application/json',
+            'Prefer': 'return=minimal'
+        };
+        await fetch(`${supabaseUrl}/rest/v1/comments`, {
+            method: 'POST',
+            headers,
+            body: JSON.stringify({ post_id: postId, ...newComment })
+        });
+    } catch (e) {
+        console.warn('Could not save comment to Supabase:', e);
+    }
     
     input.value = '';
     renderFeed();
@@ -309,7 +469,7 @@ function renderCalendar() {
     const firstDay = new Date(currentYear, currentMonth, 1).getDay();
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
     
-    const posts = MOCK_DATA.posts.filter(p => p.clientId === state.currentClient);
+    const posts = state.data.posts.filter(p => p.clientId === state.currentClient);
     const postsByDay = {};
     posts.forEach(post => {
         const day = parseInt(post.date.split('-')[2]);
