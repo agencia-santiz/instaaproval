@@ -14,11 +14,13 @@ Plataforma de aprovação de posts Instagram para agências de marketing gerenci
 - **Logo:** Texto com gradiente
 
 ### 2.2 Stack Tecnológico
+- **Decisão:** Vanilla JS (NÃO Next.js)
 - Frontend: Vanilla JS (ES6+)
 - CSS: CSS Variables + Modern CSS
 - Backend: Supabase (PostgreSQL)
 - Hosting: Vercel
 - Ícones: Lucide Icons
+- Design: Figma (prototipagem)
 
 ### 2.3 Arquivo de Estrutura
 ```
@@ -35,13 +37,15 @@ supabase/      - Schema SQL
 ## 3. Escopo Variável (Pode Alterar)
 
 ### 3.1 Funcionalidades
-- Feed de aprovações ✓
-- Calendário ✓
-- Filtros por status ✓
-- Sistema de comentários ✓
-- Simulador de card Instagram ✓
-- Upload de imagens (futuro)
-- Autenticação (futuro)
+- [x] Feed de aprovações
+- [x] Calendário
+- [x] Filtros por status
+- [x] Sistema de comentários
+- [x] Simulador de card Instagram
+- [ ] Upload de imagens
+- [ ] Autenticação
+- [ ] Múltiplos usuários
+- [ ] Integração Google Calendar
 
 ### 3.2 UI/Estilo Visual
 - Glassmorphism
@@ -72,31 +76,57 @@ supabase/      - Schema SQL
 
 ---
 
-## 5. Processo de Mudanças
+## 5. Roadmap de Desenvolvimento (Fases)
 
-### 5.1 Solicitar Alteração
+### 🥇 Fase 1: MVP (Concluído)
+- [x] Login de clientes
+- [x] CRUD de posts
+- [x] Upload de assets (mock)
+- [x] Simulador visual Instagram
+- [x] Calendário Básico
+- [x] Aprovação/Rejeição
+
+### 🥈 Fase 2: Interatividade (Pendente)
+- [ ] Simulador interativo (carousel, vídeo)
+- [ ] Dashboard de aprovação completo
+- [ ] Sistema de comentários
+- [ ] Histórico de alterações
+
+### 🥉 Fase 3: Escalabilidade (Futuro)
+- [ ] Autenticação real
+- [ ] Múltiplos usuários por cliente
+- [ ] Brand Guidelines
+- [ ] Integração Google Calendar
+- [ ] Analytics
+
+---
+
+## 6. Processo de Mudanças
+
+### 6.1 Solicitar Alteração
 1. Descrever o que precisa mudar
 2. Prioridade (alta/média/baixa)
 3. Prazo (se necessário)
 
-### 5.2 Implementar
+### 6.2 Implementar
 1. Revisar SPEC.md e skills relevantes
 2. Implementar
 3. Testar
 4. Commitar com descrição clara
 
-### 5.3 Deploy
+### 6.3 Deploy
 1. Push para `main`
 2. Vercel faz deploy automático
 3. Verificar em produção
 
 ---
 
-## 6. Links Úteis
+## 7. Links Úteis
 
 - **App:** https://instaaproval.vercel.app/
 - **Repo:** https://github.com/agencia-santiz/instaaproval
 - **Supabase:** https://supabase.com/dashboard/project/dbrbieetsihnlzfjjrbw
+- **Figma:** (link do projeto)
 
 ---
 
