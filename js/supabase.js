@@ -1,5 +1,5 @@
-const supabaseUrl = 'https://YOUR_PROJECT.supabase.co';
-const supabaseAnonKey = 'YOUR_ANON_KEY';
+const supabaseUrl = 'https://dbrbieetsihnlzfjjrbw.supabase.co';
+const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBiYW5lIiwicmVmIjoiZGJyYmllZXRzaWhubHpmanJidyIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzc2MTI0MzE1LCJleHAiOjIwOTE3MDAzMTV9.v99ZcA8NIRD2-w6YpSb_ffMnvk3-eyPAMRT_4hAdGsU';
 
 const API_BASE = '/api';
 
