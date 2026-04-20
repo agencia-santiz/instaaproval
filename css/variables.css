@@ -1,70 +1,162 @@
-/* variables.css - Paleta de Cores e Tokens Contemporâneos */
+/* variables.css — Modern SaaS Dashboard Design System
+   Minimalist, professional, and intuitive.
+   Using Inter for a clean typography stack.
+*/
 :root {
-  /* === COLORS === */
-  --hue-primary: 350; 
-  --sat-primary: 82%;
-  --light-primary: 60%;
-  
-  --color-bg:           #09090b;
-  --color-bg-elevated:  #18181b;
-  --color-bg-card:      #27272a;
-  
-  --color-text-primary: #FAFAFA;
-  --color-text-secondary: #a1a1aa;
-  
-  --color-primary:      #BA0C2F;
-  --color-primary-light: #D62839;
-  --color-primary-dark: #8B0A24;
-  --color-accent:       #BA0C2F;
-  --color-success:      #10b981;
-  --color-warning:      #f59e0b;
-  --color-danger:       #ef4444;
+  /* === PALETTE — Brand === */
+  --palette-primary:          #2563EB; /* Muted professional blue */
+  --palette-primary-deep:     #1D4ED8;
+  --palette-primary-glow:     rgba(37, 99, 235, 0.15);
+  --palette-primary-subtle:   rgba(37, 99, 235, 0.08);
+
+  /* === PALETTE — Error === */
+  --palette-error:            #EF4444;
+  --palette-error-hover:      #DC2626;
+
+  /* === PALETTE — Text Scale === */
+  --palette-text-primary:     #0F172A; /* Slate 900 */
+  --palette-text-focused:     #1E293B; /* Slate 800 */
+  --palette-text-secondary:   #64748B; /* Slate 500 */
+  --palette-text-disabled:    #94A3B8; /* Slate 400 */
+  --palette-text-inverse:     #FFFFFF;
+  --palette-text-legal:       #3B82F6;
+
+  /* === PALETTE — Surfaces === */
+  --palette-bg-page:          #F8FAFC; /* Slate 50 */
+  --palette-bg-elevated:      #FFFFFF;
+  --palette-bg-secondary:     #F1F5F9; /* Slate 100 */
+  --palette-bg-tertiary:      #E2E8F0; /* Slate 200 */
+  --palette-bg-card:          #FFFFFF;
+
+  /* === PALETTE — Borders === */
+  --palette-border:           #E2E8F0; /* Slate 200 */
+  --palette-border-subtle:    #F1F5F9; /* Slate 100 */
+  --palette-border-card:      #E2E8F0;
+
+  /* === PALETTE — Status === */
+  --palette-success:          #10B981; /* Emerald 500 */
+  --palette-success-bg:       #ECFDF5;
+  --palette-success-border:   #A7F3D0;
+  --palette-warning:          #F59E0B; /* Amber 500 */
+  --palette-warning-bg:       #FFFBEB;
+  --palette-warning-border:   #FDE68A;
+  --palette-review:           #8B5CF6; /* Violet 500 */
+  --palette-review-bg:        #F5F3FF;
+  --palette-review-border:    #DDD6FE;
+  --palette-danger:           #EF4444; /* Red 500 */
+  --palette-danger-bg:        #FEF2F2;
+  --palette-danger-border:    #FECACA;
+
+  /* === Legacy aliases for JS compatibility === */
+  --color-bg:                 var(--palette-bg-page);
+  --color-bg-elevated:        var(--palette-bg-elevated);
+  --color-bg-card:            var(--palette-bg-card);
+  --color-text-primary:       var(--palette-text-primary);
+  --color-text-secondary:     var(--palette-text-secondary);
+  --color-primary:            var(--palette-primary);
+  --color-primary-light:      var(--palette-primary-deep);
+  --color-primary-dark:       var(--palette-primary-deep);
+  --color-accent:             var(--palette-primary);
+  --color-success:            var(--palette-success);
+  --color-warning:            var(--palette-warning);
+  --color-review:             var(--palette-review);
+  --color-danger:             var(--palette-danger);
 
   /* Instagram Colors */
-  --color-ig-bg: #000000;
-  --color-ig-border: #262626;
-  --color-ig-text: #F5F5F5;
-  --color-ig-text-muted: #A8A8A8;
-  --color-ig-blue: #0095F6;
-  
+  --color-ig-bg:              #ffffff;
+  --color-ig-border:          #E2E8F0;
+  --color-ig-text:            #0F172A;
+  --color-ig-text-muted:      #64748B;
+  --color-ig-blue:            #3B82F6;
+
   /* === TYPOGRAPHY === */
-  --font-display: 'Inter', sans-serif;
-  --font-body: 'Inter', sans-serif;
-  
-  /* Typography scale */
-  --text-xs: clamp(0.7rem, 0.7rem + 0.1vw, 0.75rem);
-  --text-sm: clamp(0.8rem, 0.8rem + 0.1vw, 0.875rem);
-  --text-base: clamp(1rem, 0.9rem + 0.5vw, 1.125rem);
-  --text-lg: clamp(1.125rem, 1rem + 0.6vw, 1.25rem);
-  --text-xl: clamp(1.25rem, 1rem + 1.25vw, 1.75rem);
-  --text-4xl: clamp(2.5rem, 1rem + 6vw, 5rem);
-  
-  /* === SPACING === */
-  --space-1:  0.25rem;
-  --space-2:  0.5rem;
-  --space-3:  0.75rem;
-  --space-4:  1rem;
-  --space-6:  1.5rem;
-  --space-8:  2rem;
-  
+  --font-display: 'Inter', -apple-system, system-ui, 'Segoe UI', Roboto, Helvetica, sans-serif;
+  --font-body:    'Inter', -apple-system, system-ui, 'Segoe UI', Roboto, Helvetica, sans-serif;
+
+  /* Fluid type scale — conventional SaaS */
+  --text-xs:   0.75rem;     /* 12px */
+  --text-sm:   0.875rem;    /* 14px */
+  --text-base: 1rem;        /* 16px */
+  --text-md:   1.125rem;    /* 18px */
+  --text-lg:   1.25rem;     /* 20px */
+  --text-xl:   1.5rem;      /* 24px */
+  --text-2xl:  1.875rem;    /* 30px */
+  --text-3xl:  clamp(2rem, 1.2rem + 4vw, 2.5rem);
+  --text-4xl:  clamp(2.5rem, 1rem + 6vw, 3rem);
+
+  /* Letter spacing — Neutral */
+  --tracking-tight:   -0.025em;
+  --tracking-snug:    -0.0125em;
+  --tracking-normal:  0;
+  --tracking-wide:    0.025em;
+
+  /* === SPACING — 8px base unit === */
+  --space-0_5: 2px;
+  --space-1:   4px;
+  --space-1_5: 6px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   24px;
+  --space-8:   32px;
+  --space-10:  40px;
+  --space-12:  48px;
+  --space-16:  64px;
+
   /* === SIZES === */
   --sidebar-width: 250px;
-  --header-height: 70px;
-  
-  /* === BORDERS === */
-  --radius-sm: 4px;
-  --radius-md: 8px;
-  --radius-lg: 16px;
+  --header-height: 64px;
+  --container-max: 1600px;
+
+  /* === BORDER RADIUS — SaaS minimalist === */
+  --radius-xs:   2px;
+  --radius-sm:   4px;
+  --radius-md:   6px;
+  --radius-badge: 6px;
+  --radius-lg:   8px;
+  --radius-xl:   12px;
   --radius-full: 9999px;
+  --radius-circle: 50%;
+
+  /* === SHADOWS — Flat design (subtle drop shadows) === */
+  --shadow-card:      0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-card-hover: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+  --shadow-hover:     0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  --shadow-modal:     0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+  --shadow-focus:     0 0 0 2px var(--palette-bg-page), 0 0 0 4px var(--palette-primary);
+  --shadow-focus-ring: 0 0 0 2px var(--palette-bg-page), 0 0 0 4px var(--palette-primary);
+
+  /* === TRANSITIONS === */
+  --ease-smooth:  cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-bounce:  cubic-bezier(0.34, 1.56, 0.64, 1);
+  --ease-sharp:   cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-airbnb:  cubic-bezier(0.4, 0, 0.2, 1); /* mapped to ease-smooth */
+
+  --duration-fast:    150ms;
+  --duration-normal:  250ms;
+  --duration-slow:    400ms;
+  --duration-slower:  700ms;
+
+  /* === Z-INDEX === */
+  --z-base:       0;
+  --z-dropdown:   100;
+  --z-sticky:     200;
+  --z-header:     300;
+  --z-overlay:    400;
+  --z-modal:      500;
+  --z-cursor:     600;
+  --z-preloader:  700;
+  --z-grain:      800;
 }
 
+/* === GRADIENT TEXT (Brand) === */
 .gradient-text {
-  background: linear-gradient(135deg, #BA0C2F 0%, #D62839 50%, #BA0C2F 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  animation: gradientPulse 3s ease-in-out infinite;
-  background-size: 200% 200%;
+  /* Make it solid primary for minimalist feel */
+  background: none;
+  color: var(--palette-primary);
+  -webkit-text-fill-color: currentcolor;
+  animation: none;
 }
 
 @keyframes gradientPulse {

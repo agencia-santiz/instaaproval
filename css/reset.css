@@ -1,4 +1,4 @@
-/* reset.css - Base para o design premium */
+/* reset.css — Premium base reset with Airbnb-inspired defaults */
 *, *::before, *::after {
   box-sizing: border-box;
   margin: 0;
@@ -9,14 +9,19 @@ html {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  text-rendering: optimizeLegibility;
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 body {
-  font-family: var(--font-body), sans-serif;
-  background-color: var(--color-bg);
-  color: var(--color-text-primary);
-  line-height: 1.5;
+  font-family: var(--font-body);
+  background-color: var(--palette-bg-page);
+  color: var(--palette-text-primary);
+  line-height: 1.43;
   overflow-x: hidden;
+  font-weight: 500;
+  font-feature-settings: 'kern' 1, 'liga' 1;
 }
 
 a {
@@ -34,13 +39,28 @@ img, video {
   display: block;
 }
 
-button, input, textarea {
+button, input, textarea, select {
   font-family: inherit;
+  font-weight: inherit;
   background: none;
   border: none;
   outline: none;
+  color: inherit;
 }
 
 button {
   cursor: pointer;
+}
+
+/* Focus visible — Airbnb's focus ring */
+:focus-visible {
+  outline: 2px solid var(--palette-text-primary);
+  outline-offset: 2px;
+  border-radius: var(--radius-sm);
+}
+
+/* Selection color */
+::selection {
+  background: var(--palette-rausch-subtle);
+  color: var(--palette-text-primary);
 }

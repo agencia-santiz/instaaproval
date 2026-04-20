@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="pt-BR" data-theme="dark">
+<html lang="pt-BR" data-theme="light">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -11,20 +11,33 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   
-  <!-- Fonts -->
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+  <!-- Fonts — Plus Jakarta Sans (closest match to Airbnb Cereal VF) -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap">
   
+  <!-- Styles -->
   <link rel="stylesheet" href="css/reset.css">
   <link rel="stylesheet" href="css/variables.css">
+  <link rel="stylesheet" href="css/animations.css">
   <link rel="stylesheet" href="css/layout.css">
   <link rel="stylesheet" href="css/instagram.css">
   
   <!-- Favicon -->
-  
-  
+
   <script src="https://unpkg.com/lucide@latest"></script>
 </head>
 <body>
+
+  <!-- Preloader -->
+  <div class="preloader" id="preloader">
+    <div class="preloader-brand">InstaAproval</div>
+    <div class="preloader-bar">
+      <div class="preloader-bar-fill" id="preloader-bar-fill"></div>
+    </div>
+    <div class="preloader-counter" id="preloader-counter">0%</div>
+  </div>
+
+  <!-- Scroll Progress -->
+  <div class="scroll-progress" id="scroll-progress"></div>
 
   <div class="app-wrapper">
     <!-- Sidebar -->
@@ -38,6 +51,9 @@
           <div class="nav-group-title">Menu Principal</div>
           <a class="nav-link active" id="nav-feed"><i data-lucide="layout-grid"></i> Feed de Aprovações</a>
           <a class="nav-link" id="nav-calendario"><i data-lucide="calendar"></i> Calendário</a>
+          <a class="nav-link" id="nav-analytics"><i data-lucide="bar-chart-2"></i> Analytics</a>
+          <a class="nav-link" id="nav-guidelines"><i data-lucide="book-open"></i> Brand Guidelines</a>
+          <a class="nav-link admin-only" id="nav-users" style="display:none;"><i data-lucide="users"></i> Usuários</a>
         </div>
         
         <div class="nav-group">
@@ -56,7 +72,7 @@
           <h2 id="current-view-title" class="text-xl">Cliente: Brothers Filmes</h2>
         </div>
         <div class="topbar-actions">
-          <button class="btn btn-primary" onclick="alert('Funcionalidade de upload em breve!')">
+          <button class="btn btn-primary" onclick="openNewPostModal()">
             <i data-lucide="plus"></i> Novo Post
           </button>
         </div>
@@ -69,6 +85,8 @@
   </div>
 
   <script src="js/mockData.js"></script>
-  <script src="js/app.js"></script>
+  <script src="js/supabase.js"></script>
+  <script src="js/app-enhanced.js"></script>
+  <div id="modal-root"></div>
 </body>
 </html>

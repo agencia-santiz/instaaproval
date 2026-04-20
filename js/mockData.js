@@ -2,9 +2,9 @@
 
 const MOCK_DATA = {
     clients: [
-        { id: 'c1', name: 'Brothers Filmes', avatar: 'https://images.unsplash.com/photo-1594909122845-11baa439b7bf?q=80&w=2070&auto=format&fit=crop' },
-        { id: 'c2', name: 'Designers Papelée', avatar: 'https://images.unsplash.com/photo-1628155930542-3c7a64e2c833?q=80&w=1974&auto=format&fit=crop' },
-        { id: 'c3', name: 'Asfer Química', avatar: 'https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?q=80&w=1974&auto=format&fit=crop' }
+        { id: 'c1', name: 'Brothers Filmes', avatar: 'https://images.unsplash.com/photo-1594909122845-11baa439b7bf?q=80&w=2070&auto=format&fit=crop', instagramUsername: 'brothersfilmes' },
+        { id: 'c2', name: 'Designers Papelee', avatar: 'https://images.unsplash.com/photo-1628155930542-3c7a64e2c833?q=80&w=1974&auto=format&fit=crop', instagramUsername: 'designerspapelee' },
+        { id: 'c3', name: 'Asfer Quimica', avatar: 'https://images.unsplash.com/photo-1579373903781-fd5c0c30c4cd?q=80&w=1974&auto=format&fit=crop', instagramUsername: 'asferquimica' }
     ],
     posts: [
         {
@@ -47,7 +47,7 @@ const MOCK_DATA = {
             id: 'p3',
             clientId: 'c2',
             type: 'image',
-            status: 'pending',
+            status: 'changes_requested',
             date: '2026-04-20',
             username: 'designerspapelee',
             userAvatar: 'https://images.unsplash.com/photo-1628155930542-3c7a64e2c833?q=80&w=1974&auto=format&fit=crop',
@@ -63,3 +63,4 @@ const MOCK_DATA = {
         }
     ]
 };
+

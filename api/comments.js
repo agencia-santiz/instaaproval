@@ -3,6 +3,10 @@ const supabaseKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cC
 
 export default async function handler(req, res) {
   const { postId } = req.query;
+  const tenantClientId = req.headers['x-client-id'];
+  const userRole = req.headers['x-user-role'] || 'viewer';
+  const isAdmin = userRole === 'admin';
+  const canComment = isAdmin || userRole === 'editor' || userRole === 'approver';
   
   const headers = {
     'apikey': supabaseKey,
@@ -13,6 +17,15 @@ export default async function handler(req, res) {
   
   if (req.method === 'GET' && postId) {
     try {
+      if (tenantClientId && !isAdmin) {
+        const postRes = await fetch(`${supabaseUrl}/rest/v1/posts?id=eq.${postId}&client_id=eq.${tenantClientId}&select=id`, { headers });
+        const postData = await postRes.json();
+        if (!Array.isArray(postData) || postData.length === 0) {
+          res.status(403).json({ error: 'Tenant mismatch for comments read' });
+          return;
+        }
+      }
+
       const url = `${supabaseUrl}/rest/v1/comments?post_id=eq.${postId}&order=created_at.desc`;
       const response = await fetch(url, { headers });
       const data = await response.json();
@@ -21,11 +34,30 @@ export default async function handler(req, res) {
       res.status(500).json({ error: error.message });
     }
   } else if (req.method === 'POST') {
+    if (!canComment) {
+      res.status(403).json({ error: 'Role cannot add comments' });
+      return;
+    }
     try {
+      const body = { ...(req.body || {}) };
+      if (!body.post_id) {
+        res.status(400).json({ error: 'post_id is required' });
+        return;
+      }
+
+      if (tenantClientId && !isAdmin) {
+        const postRes = await fetch(`${supabaseUrl}/rest/v1/posts?id=eq.${body.post_id}&client_id=eq.${tenantClientId}&select=id`, { headers });
+        const postData = await postRes.json();
+        if (!Array.isArray(postData) || postData.length === 0) {
+          res.status(403).json({ error: 'Tenant mismatch for comments create' });
+          return;
+        }
+      }
+
       const response = await fetch(`${supabaseUrl}/rest/v1/comments`, {
         method: 'POST',
         headers,
-        body: JSON.stringify(req.body)
+        body: JSON.stringify(body)
       });
       const data = await response.json();
       res.status(201).json(data);

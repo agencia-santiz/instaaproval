@@ -3,6 +3,9 @@ const supabaseKey = process.env.SUPABASE_ANON_KEY || 'eyJhbGciOiJIUzI1NiIsInR5cC
 
 export default async function handler(req, res) {
   const { clientId } = req.query;
+  const tenantClientId = req.headers['x-client-id'];
+  const userRole = req.headers['x-user-role'] || 'viewer';
+  const isAdmin = userRole === 'admin';
   
   const headers = {
     'apikey': supabaseKey,
@@ -13,17 +16,24 @@ export default async function handler(req, res) {
   
   if (req.method === 'GET') {
     try {
-      const url = clientId 
-        ? `${supabaseUrl}/rest/v1/clients?id=eq.${clientId}`
+      let scopedClientId = clientId;
+      if (tenantClientId && !isAdmin) scopedClientId = tenantClientId;
+
+      const url = scopedClientId
+        ? `${supabaseUrl}/rest/v1/clients?id=eq.${scopedClientId}`
         : `${supabaseUrl}/rest/v1/clients`;
       
       const response = await fetch(url, { headers });
       const data = await response.json();
-      res.status(200).json(data);
+      res.status(response.status).json(data);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }
   } else if (req.method === 'POST') {
+    if (!isAdmin) {
+      res.status(403).json({ error: 'Only admin can create clients' });
+      return;
+    }
     try {
       const response = await fetch(`${supabaseUrl}/rest/v1/clients`, {
         method: 'POST',
@@ -31,7 +41,7 @@ export default async function handler(req, res) {
         body: JSON.stringify(req.body)
       });
       const data = await response.json();
-      res.status(201).json(data);
+      res.status(response.status).json(data);
     } catch (error) {
       res.status(500).json({ error: error.message });
     }

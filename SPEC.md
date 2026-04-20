@@ -15,7 +15,7 @@
 - Listagem de posts por cliente
 - Visualização de card Instagram simulado
 - Carrossel com múltiplas imagens
-- Status: Pendente, Aprovado, Rejeitado
+- Status: Pendente, Aprovado, Solicitar Alteracao, Rejeitado
 - Caption renderizada com hashtags destacadas
 
 ### 2.2 Sistema de Comentários
@@ -23,6 +23,7 @@
 - Comentários de cliente
 - Input para adicionar novos feedbacks
 - Data e autor automáticamente
+- Historico de mudancas de status (quem alterou, de/para e quando)
 
 ### 2.3 Calendário
 - Grid mensal funcional
@@ -36,7 +37,7 @@
 - Cor distintiva por cliente
 
 ### 2.5 Filtros
-- Filtrar por status (Pendente/Aprovado/Rejeitado)
+- Filtrar por status (Pendente/Aprovado/Solicitar Alteracao/Rejeitado)
 - Toggle na interface
 
 ---
@@ -114,6 +115,7 @@ GET  /api/comments/[post_id] - Get comments for post
 - **Status Colors:**
   - Pending: #F59E0B (Amber)
   - Approved: #10B981 (Green)
+  - Changes Requested: #F97316 (Orange)
   - Rejected: #EF4444 (Red)
 
 ### 4.2 Design System
@@ -212,3 +214,4 @@ GET  /api/comments/[post_id] - Get comments for post
 2. Upload real de imagens? (usar Supabase Storage)
 3. Notificações em tempo real? (deferred to Phase 2)
 4. Multi-usuário/equipe? (deferred to Phase 2)
+
