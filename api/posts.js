@@ -45,6 +45,8 @@ export default async function handler(req, res) {
     }
     try {
       const body = { ...(req.body || {}) };
+      const actorName = body.actor_name || 'Sistema';
+      delete body.actor_name;
       if (!body.status) body.status = 'pending';
       if (!allowedStatuses.includes(body.status)) {
         res.status(400).json({ error: 'Invalid status value' });
