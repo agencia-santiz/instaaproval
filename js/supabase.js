@@ -51,26 +51,54 @@ const supabase = {
       const uploads = [];
 
       for (const file of files) {
-        const base64Data = await fileToBase64(file);
-        const res = await fetch(`${API_BASE}/upload`, {
+        const cleanName = String(file.name || 'asset')
+          .trim()
+          .replace(/\s+/g, '-')
+          .replace(/[^a-zA-Z0-9._-]/g, '')
+          .toLowerCase();
+        
+        const uniquePath = `${folder}/${Date.now()}-${Math.random().toString(36).slice(2, 8)}-${cleanName}`;
+        const uploadUrl = `${supabaseUrl}/storage/v1/object/${bucket}/${uniquePath}`;
+
+        const res = await fetch(uploadUrl, {
           method: 'POST',
-          headers: { 'Content-Type': 'application/json', ...getSessionHeaders() },
-          body: JSON.stringify({
-            bucket,
-            folder,
-            fileName: file.name,
-            contentType: file.type || 'application/octet-stream',
-            base64Data
-          })
+          headers: {
+            'apikey': supabaseAnonKey,
+            'Authorization': `Bearer ${supabaseAnonKey}`,
+            'x-upsert': 'false'
+            // Let the browser set the Content-Type with the boundary if using FormData, 
+            // but we are sending binary body natively so we must set Content-Type
+          },
+          body: file
         });
 
         if (!res.ok) {
-          const payload = await res.json().catch(() => ({}));
-          throw new Error(payload.error || 'Upload failed');
+          console.warn("Direct upload failed, attempting fallback to backend API...");
+          // Fallback to API base64 parser for strict RLS environments
+          const base64Data = await fileToBase64(file);
+          const fallbackRes = await fetch(`${API_BASE}/upload`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json', ...getSessionHeaders() },
+            body: JSON.stringify({
+              bucket,
+              folder,
+              fileName: file.name,
+              contentType: file.type || 'application/octet-stream',
+              base64Data
+            })
+          });
+
+          if (!fallbackRes.ok) {
+             const fallbackPayload = await fallbackRes.json().catch(() => ({}));
+             throw new Error(fallbackPayload.error || 'Fallback upload failed');
+          }
+          const fallbackPayload = await fallbackRes.json();
+          uploads.push(fallbackPayload.publicUrl);
+          continue;
         }
 
-        const payload = await res.json();
-        if (payload.publicUrl) uploads.push(payload.publicUrl);
+        const publicUrl = `${supabaseUrl}/storage/v1/object/public/${bucket}/${uniquePath}`;
+        uploads.push(publicUrl);
       }
 
       return uploads;
