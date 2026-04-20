@@ -153,7 +153,7 @@ async function initApp() {
 
     // AUTH DISABLED — auto-assign admin session for development
     if (!state.auth) {
-        state.auth = { id: 'dev', name: 'Admin', email: 'admin@santiz.com', role: 'admin', clientId: null };
+        persistSession({ id: 'dev', name: 'Admin', email: 'admin@santiz.com', role: 'admin', clientId: null });
     }
 
     await loadData();
