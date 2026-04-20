@@ -1188,8 +1188,8 @@ window.openNewClientModal = () => {
                 <label>Instagram (@usuario)
                     <input name="instagramUsername" type="text" placeholder="brothersfilmes">
                 </label>
-                <label>Foto de perfil do Instagram (URL)
-                    <input name="instagramProfilePhoto" type="url" placeholder="https://...">
+                <label>Foto de perfil do Instagram
+                    <input name="instagramProfilePhotoFile" type="file" accept="image/*">
                 </label>
                 <label>Cor da marca
                     <input name="color" type="text" placeholder="#BA0C2F" value="#BA0C2F">
@@ -1213,12 +1213,30 @@ async function handleNewClientSubmit(event) {
     const statusEl = document.getElementById('client-save-status');
     if (saveBtn) saveBtn.disabled = true;
 
+    if (statusEl) statusEl.textContent = 'Preparando upload...';
+
+    const uploadedAvatarFile = form.querySelector('input[name="instagramProfilePhotoFile"]')?.files[0];
+    let avatarUrl = '';
+    
+    if (uploadedAvatarFile) {
+        if (statusEl) statusEl.textContent = 'Enviando foto de perfil...';
+        const avatarUploadedUrls = await api().uploadAssets?.([uploadedAvatarFile], {
+            bucket: 'post-assets',
+            folder: 'avatars'
+        });
+        if (Array.isArray(avatarUploadedUrls) && avatarUploadedUrls.length > 0) {
+            avatarUrl = avatarUploadedUrls[0];
+        } else {
+            if (statusEl) statusEl.textContent = 'Falha no upload da foto. Salvando sem imagem.';
+        }
+    }
+
     const basePayload = {
         name: String(formData.get('name') || '').trim(),
         color: String(formData.get('color') || '#BA0C2F').trim() || '#BA0C2F',
-        avatar_url: String(formData.get('instagramProfilePhoto') || '').trim(),
+        avatar_url: avatarUrl,
         instagram_username: String(formData.get('instagramUsername') || '').trim().replace(/^@/, ''),
-        instagram_profile_photo: String(formData.get('instagramProfilePhoto') || '').trim()
+        instagram_profile_photo: avatarUrl
     };
 
     let created = await api().createClient?.(basePayload);
@@ -1286,9 +1304,6 @@ window.openNewPostModal = () => {
                 <label>Foto de perfil do Instagram (Upload)
                     <input name="userAvatarFile" type="file" accept="image/*">
                 </label>
-                <label>Foto de perfil do Instagram (URL Alternativa)
-                    <input name="userAvatar" id="post-user-avatar" type="url" placeholder="https://..." value="${selectedClient?.instagramProfilePhoto || selectedClient?.avatar || ''}">
-                </label>
                 <label>Legenda
                     <textarea name="caption" rows="4" placeholder="Escreva a copy do post"></textarea>
                 </label>
@@ -1296,10 +1311,7 @@ window.openNewPostModal = () => {
                     <input name="ctaText" type="text" placeholder="Saiba mais">
                 </label>
                 <label>Upload de midias (imagens/videos)
-                    <input name="assetFiles" type="file" accept="image/*,video/*" multiple>
-                </label>
-                <label>Midias (URLs separadas por virgula)
-                    <textarea name="media" rows="3" placeholder="https://...jpg, https://...jpg"></textarea>
+                    <input name="assetFiles" type="file" accept="image/*,video/*" multiple required>
                 </label>
                 <p id="upload-status" class="text-secondary" style="font-size:12px; margin-top:-4px;">Voce pode subir arquivos locais ou colar URLs.</p>
                 <div class="modal-actions">
@@ -1329,14 +1341,8 @@ async function handleNewPostSubmit(event) {
     const saveBtn = document.getElementById('save-post-btn');
     const uploadStatus = document.getElementById('upload-status');
     const uploadedFiles = Array.from(form.querySelector('input[name="assetFiles"]')?.files || []);
-    const urlMedia = String(formData.get('media') || '')
-        .split(',')
-        .map(item => item.trim())
-        .filter(Boolean);
-    let media = [...urlMedia];
-
     const uploadedAvatarFile = form.querySelector('input[name="userAvatarFile"]')?.files[0];
-    let userAvatarStr = formData.get('userAvatar') || state.data.clients.find(client => client.id === formData.get('clientId'))?.avatar || '';
+    let userAvatarStr = state.data.clients.find(client => client.id === formData.get('clientId'))?.avatar || '';
 
     if (saveBtn) saveBtn.disabled = true;
     if (uploadStatus) uploadStatus.textContent = 'Preparando upload...';
@@ -1360,10 +1366,18 @@ async function handleNewPostSubmit(event) {
         });
 
         if (Array.isArray(uploadedUrls) && uploadedUrls.length > 0) {
-            media = [...uploadedUrls, ...urlMedia];
+            media = [...uploadedUrls];
             if (uploadStatus) uploadStatus.textContent = 'Upload finalizado com sucesso.';
         } else if (uploadStatus) {
-            uploadStatus.textContent = 'Upload falhou. O post sera salvo com URLs manuais, se houver.';
+            uploadStatus.textContent = 'Nao foi possivel salvar no backend porque o upload falhou.';
+            if (saveBtn) saveBtn.disabled = false;
+            return;
+        }
+    } else {
+        if (uploadStatus) {
+            uploadStatus.textContent = 'Por favor, selecione midias para upload.';
+            if (saveBtn) saveBtn.disabled = false;
+            return;
         }
     }
 
